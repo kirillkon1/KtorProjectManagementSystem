@@ -1,0 +1,19 @@
+server:
+  port: ${SERVER_PORT:5050}
+
+logging:
+  config: classpath:${logback:logback-spring.xml}
+
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: default
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: ${JWT_SECRET:Rf+963vdkSxgAP9MJVB+BIFLJoVn7sIa/mLUTtVgTaZwpVQWAOpFCsU5f9USMILMquDZFiPH5Q32pqp/YOwcky8mODXh0wPBp6zE1NFGI2vkH3W+6S7eBHn9j6xVeg1zo8WJ8m3nDdI6OmskpM0GfLpeDXkUoeUal+zN4YXcFJwD}
+          signature-algorithm: HS256
+
+

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="APP_NAME" source="spring.application.name" defaultValue="api-gateway" />
+
+    <property resource="application.yml"/>
+    <property name="LOG_FILE" value="logs/${APP_NAME}"/>
+
+    <appender name="STD_TRACE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>TRACE</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger.%M - %cyan(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STD_DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger{36}.%M - %cyan(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STD_INFO" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger{36}.%M - %green(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STD_WARN" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger{36}.%M - %yellow(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STD_ERROR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger{36}.%M - %red(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([${APP_NAME}]) %highlight(%-5level) %logger{36}.%M - %cyan(%msg%n)
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="info" additivity="false">
+        <appender-ref ref="STD_TRACE"/>
+        <appender-ref ref="STD_DEBUG"/>
+        <appender-ref ref="STD_INFO"/>
+        <appender-ref ref="STD_WARN"/>
+        <appender-ref ref="STD_ERROR"/>
+    </root>
+
+</configuration>

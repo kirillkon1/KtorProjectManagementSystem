@@ -1,0 +1,58 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${USER_SERVICE:lb://user-service}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - LogFilter
+
+        - id: user-service
+          uri: ${USER_SERVICE:lb://user-service}
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - LogFilter
+
+        - id: task-service
+          uri: ${TASK_SERVICE:lb://task-service}
+          predicates:
+            - Path=/api/tasks/**
+          filters:
+            - LogFilter
+
+        - id: project-service
+          uri: ${PROJECT_SERVICE:lb://project-service}
+          predicates:
+            - Path=/api/projects/**
+          filters:
+            - LogFilter
+
+        - id: analytics-service
+          uri: ${ANALYTICS_SERVICE:lb://analytics-service}
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - LogFilter
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowed-origin-patterns:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:5761/eureka/}

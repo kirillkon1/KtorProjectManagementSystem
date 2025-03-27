@@ -1,0 +1,170 @@
+services:
+  config-server:
+    container_name: server-config
+    build: ../../CloudConfig
+    environment:
+      - SERVER_PORT=${ENV_SERVER_CONFIG_PORT}
+    ports:
+      - ${ENV_SERVER_CONFIG_PORT}:${ENV_SERVER_CONFIG_PORT}
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  spring-api-gateway:
+    container_name: API-Gateway
+    build: ../../ApiGateway
+    environment:
+      - SERVER_PORT=${ENV_API_GATEWAY_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      # microservices
+      - USER_SERVICE=${ENV_EUREKA_USERS_SERVICE_URL}
+      - TASK_SERVICE=${ENV_EUREKA_TASKS_SERVICE_URL}
+      - PROJECT_SERVICE=${ENV_EUREKA_PROJECTS_SERVICE_URL}
+      - ANALYTICS_SERVICE=${ENV_EUREKA_ANALYTICS_SERVICE_URL}
+    ports:
+      - ${ENV_API_GATEWAY_PORT}:${ENV_API_GATEWAY_PORT}
+    networks:
+      - microservices-network
+    depends_on:
+      - config-server
+      - eureka-server
+      - spring-user-service
+      - spring-task-service
+      - spring-project-service
+      - spring-analytics-service
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  eureka-server:
+    container_name: eureka-server
+    build: ../../EurekaServer
+    ports:
+      - ${ENV_EUREKA_SERVER_PORT}:${ENV_EUREKA_SERVER_PORT}
+    environment:
+      - SERVER_PORT=${ENV_EUREKA_SERVER_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  spring-user-service:
+    container_name: users-service
+    build: ../../UserManagementService
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVER_PORT=${ENV_USERS_SERVICE_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      # PostgreSQL
+      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
+      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
+      - APP_POSTGRESQL_NAME=${ENV_USERS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+    depends_on:
+      #- postgres
+      - config-server
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  spring-task-service:
+    container_name: tasks-service
+    build: ../../TaskManagementService
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      # PostgreSQL
+      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
+      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
+      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+      #Kafka
+      - KAFKA_URL=${ENV_KAFKA_URL}
+    depends_on:
+      #- postgres
+      - config-server
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  spring-project-service:
+    container_name: projects-service
+    build: ../../ProjectManagementService
+    ports:
+      - "8003:8003"
+    environment:
+      - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      # PostgreSQL
+      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
+      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
+      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+    depends_on:
+      #- postgres
+      - config-server
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Analytics Service
+  spring-analytics-service:
+    container_name: analytics-service
+    image: analytics-service:latest
+    build: ../../AnalyticsService
+    ports:
+      - "8004:8004"
+    environment:
+      - SERVER_PORT=${ENV_ANALYTICS_SERVICE_PORT}
+      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
+      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      # PostgreSQL
+      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
+      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
+      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+       # Kafka
+      - KAFKA_URL=${ENV_KAFKA_URL}
+    depends_on:
+      - config-server
+      #- postgres
+      #- kafka
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge

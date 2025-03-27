@@ -1,0 +1,56 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${USER_SERVICE:http://localhost:5001}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - LogFilter
+
+        - id: user-service
+          uri: ${USER_SERVICE:http://localhost:5001}
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - LogFilter
+
+        - id: task-service
+          uri: ${TASK_SERVICE:http://localhost:5002}
+          predicates:
+            - Path=/api/tasks/**
+          filters:
+            - LogFilter
+
+        - id: project-service
+          uri: ${PROJECT_SERVICE:http://localhost:5003}
+          predicates:
+            - Path=/api/projects/**
+          filters:
+            - LogFilter
+
+        - id: analytics-service
+          uri: ${ANALYTICS_SERVICE:http://localhost:5004}
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - LogFilter
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowed-origin-patterns:
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+eureka:
+  client:
+    enabled: false
