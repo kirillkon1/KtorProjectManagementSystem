@@ -12,16 +12,30 @@ import ru.itmo.repository.TaskEventRepository
 import java.time.Duration
 import java.util.*
 
+
+data class KafkaConfig(
+    val url: String,
+)
+
+
+fun Application.kafkaConfig(): KafkaConfig {
+    val config = environment.config
+    return KafkaConfig(
+        url = config.property("kafka.url").getString(),
+    )
+}
+
+
 fun Application.configureKafka() {
 
 
     val repo: TaskEventRepository by inject<TaskEventRepository>()
-
     val jsonParser = Json { ignoreUnknownKeys = true }
+    val kafkaConfig = kafkaConfig()
 
     // Kafka Consumer для получения ответов из TaskService (топик "task-response")
     val consumerProps = Properties().apply {
-        put("bootstrap.servers", "localhost:9092")
+        put("bootstrap.servers", kafkaConfig.url)
         put("group.id", "analytics-service-group")
         put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
         put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")

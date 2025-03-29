@@ -33,4 +33,7 @@ fun Application.module() {
     configureDatabases()
     configureRouting()
     configurePrometheus()
+
+    println("SERVER STARTED ON PORT ${environment.config.property("ktor.deployment.port").getString()}")
+
 }

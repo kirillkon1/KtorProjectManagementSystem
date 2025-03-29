@@ -1,0 +1,115 @@
+services:
+  ktor-api-gateway:
+    container_name: ktor-API-Gateway
+    build: ../../ApiGateway
+    environment:
+      - SERVER_PORT=${ENV_API_GATEWAY_PORT}
+      # microservices
+      - USER_SERVICE=${ENV_EUREKA_USERS_SERVICE_URL}
+      - TASK_SERVICE=${ENV_EUREKA_TASKS_SERVICE_URL}
+      - PROJECT_SERVICE=${ENV_EUREKA_PROJECTS_SERVICE_URL}
+      - ANALYTICS_SERVICE=${ENV_EUREKA_ANALYTICS_SERVICE_URL}
+    ports:
+      - ${ENV_API_GATEWAY_PORT}:${ENV_API_GATEWAY_PORT}
+    networks:
+      - microservices-network
+    depends_on:
+      - ktor-user-service
+      - ktor-task-service
+      - ktor-project-service
+      - ktor-analytics-service
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ktor-user-service:
+    container_name: ktor-users-service
+    build: ../../UserService
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVER_PORT=${ENV_USERS_SERVICE_PORT}
+      # PostgreSQL
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_USERS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+    depends_on:
+      #- postgres
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ktor-task-service:
+    container_name: ktor-tasks-service
+    build: ../../TaskService
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
+      # PostgreSQL
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+      #Kafka
+      - KAFKA_URL=${ENV_KAFKA_URL}
+    depends_on:
+      #- postgres
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ktor-project-service:
+    container_name: ktor-projects-service
+    build: ../../ProjectService
+    ports:
+      - "8003:8003"
+    environment:
+      - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
+      # PostgreSQL
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+    depends_on:
+      #- postgres
+    networks:
+      - microservices-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Analytics Service
+  ktor-analytics-service:
+    container_name: ktor-analytics-service
+    image: analytics-service:latest
+    build: ../../AnalyticsService
+    ports:
+      - "8004:8004"
+    environment:
+      - SERVER_PORT=${ENV_ANALYTICS_SERVICE_PORT}
+      # PostgreSQL
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_ANALYTICS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
+      - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+       # Kafka
+      - KAFKA_URL=${ENV_KAFKA_URL}
+    depends_on:
+      #- postgres
+      #- kafka
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge

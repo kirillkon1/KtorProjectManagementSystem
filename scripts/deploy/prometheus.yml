@@ -2,34 +2,28 @@ global:
   scrape_interval: 1s
 
 scrape_configs:
-
-  - job_name: 'user-manager-service'
-    metrics_path: '/actuator/prometheus'
+  - job_name: 'user-service'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'user-manager-service:8001' ]
+      - targets: ['ktor-user-service:8001']
 
-  - job_name: 'task-manager-service'
-    metrics_path: '/actuator/prometheus'
+  - job_name: 'task-service'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['task-manager-service:8002']
+      - targets: ['ktor-task-service:8002']
 
-  - job_name: 'project-manager-service'
-    metrics_path: '/actuator/prometheus'
+  - job_name: 'project-service'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['project-manager-service:8003']
+      - targets: ['ktor-project-service:8003']
 
   - job_name: 'analytics-service'
-    metrics_path: '/actuator/prometheus'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: [ 'analytics-service:8004' ]
+      - targets: ['ktor-analytics-service:8004']
 
-  - job_name: 'config-server'
+  - job_name: 'ktor-api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'config-server:8888' ]
-
-  - job_name: 'api-gateway'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'api-gateway:8080' ]
+      - targets: ['ktor-api-gateway:8050']
 

@@ -15,14 +15,28 @@ import java.time.Duration
 import java.util.*
 
 
+data class KafkaConfig(
+    val url: String,
+)
+
+
+fun Application.kafkaConfig(): KafkaConfig {
+    val config = environment.config
+    return KafkaConfig(
+        url = config.property("kafka.url").getString(),
+    )
+}
+
+
 fun Application.kafkaConfigure(){
 
+    val kafkaConfig = kafkaConfig()
 
     val taskRepository: TaskRepository by inject<TaskRepository>()
 
     // Инициализация Kafka Consumer для топика "task-requests"
     val consumerProps = Properties().apply {
-        put("bootstrap.servers", "localhost:9092")
+        put("bootstrap.servers", kafkaConfig.url)
         put("group.id", "task-service-group")
         put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
         put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
@@ -32,7 +46,7 @@ fun Application.kafkaConfigure(){
 
     // Инициализация Kafka Producer для топика "task-response"
     val producerProps = Properties().apply {
-        put("bootstrap.servers", "localhost:9092")
+        put("bootstrap.servers", "kafka:9092")
         put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
         put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     }

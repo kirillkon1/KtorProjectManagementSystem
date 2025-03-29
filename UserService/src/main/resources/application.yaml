@@ -1,0 +1,17 @@
+ktor:
+  application:
+    modules:
+      - "ru.itmo.ApplicationKt.module"
+  deployment:
+    port: "$SERVER_PORT:5001"
+
+jwt:
+  issuer: "https://jwt-provider-domain/"
+  audience: "jwt-audience"
+  secret: "Rf+963vdkSxgAP9MJVB+BIFLJoVn7sIa/mLUTtVgTaZwpVQWAOpFCsU5f9USMILMquDZFiPH5Q32pqp/YOwcky8mODXh0wPBp6zE1NFGI2vkH3W+6S7eBHn9j6xVeg1zo8WJ8m3nDdI6OmskpM0GfLpeDXkUoeUal+zN4YXcFJwD"
+  validityInMs: 3600000
+
+postgres:
+  url: "$APP_POSTGRESQL_DATABASE:jdbc:postgresql://127.0.0.1:5432/users_db"
+  username: "$APP_POSTGRESQL_USER:postgres"
+  password: "$APP_POSTGRESQL_PASSWORD:postgres"

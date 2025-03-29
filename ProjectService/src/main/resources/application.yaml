@@ -1,0 +1,11 @@
+ktor:
+  application:
+    modules:
+      - "com.example.ApplicationKt.module"
+  deployment:
+    port: "$SERVER_PORT:5004"
+
+postgres:
+  url: "$APP_POSTGRESQL_DATABASE:jdbc:postgresql://127.0.0.1:5432/projects_db"
+  username: "$APP_POSTGRESQL_USER:postgres"
+  password: "$APP_POSTGRESQL_PASSWORD:postgres"

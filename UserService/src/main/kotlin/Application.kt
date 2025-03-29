@@ -34,4 +34,7 @@ fun Application.module() {
     configureHTTP()
     configureRouting()
     configureDatabases()
+
+    println("SERVER STARTED ON PORT ${environment.config.property("ktor.deployment.port").getString()}")
+
 }

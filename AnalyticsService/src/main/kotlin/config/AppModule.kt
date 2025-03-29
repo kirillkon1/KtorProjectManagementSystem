@@ -11,13 +11,14 @@ import java.util.*
 
 
 val appModule = module {
+
     // Регистрируем TaskEventRepository
     single { TaskEventRepository() }
 
     // Регистрируем KafkaProducer<String, String>
     single<KafkaProducer<String, String>> {
         val props = Properties().apply {
-            put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+            put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092")
             put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java.name)
             put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java.name)
         }

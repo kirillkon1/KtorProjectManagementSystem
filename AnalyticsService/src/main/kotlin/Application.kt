@@ -14,6 +14,8 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
 
+    kafkaConfig()
+
 
     install(Koin) {
         modules(
@@ -26,4 +28,7 @@ fun Application.module() {
     configureRouting()
     configurePrometheus()
     configureKafka()
+
+    println("SERVER STARTED ON PORT ${environment.config.property("ktor.deployment.port").getString()}")
+
 }

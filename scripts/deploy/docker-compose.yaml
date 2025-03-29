@@ -1,26 +1,10 @@
 services:
-  config-server:
-    container_name: server-config
-    build: ../../CloudConfig
-    environment:
-      - SERVER_PORT=${ENV_SERVER_CONFIG_PORT}
-    ports:
-      - ${ENV_SERVER_CONFIG_PORT}:${ENV_SERVER_CONFIG_PORT}
-    networks:
-      - microservices-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
-  spring-api-gateway:
-    container_name: API-Gateway
+  ktor-api-gateway:
+    container_name: ktor-api-gateway
     build: ../../ApiGateway
     environment:
       - SERVER_PORT=${ENV_API_GATEWAY_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
       # microservices
       - USER_SERVICE=${ENV_EUREKA_USERS_SERVICE_URL}
       - TASK_SERVICE=${ENV_EUREKA_TASKS_SERVICE_URL}
@@ -31,52 +15,29 @@ services:
     networks:
       - microservices-network
     depends_on:
-      - config-server
-      - eureka-server
-      - spring-user-service
-      - spring-task-service
-      - spring-project-service
-      - spring-analytics-service
+      - ktor-user-service
+      - ktor-task-service
+      - ktor-project-service
+      - ktor-analytics-service
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
-  eureka-server:
-    container_name: eureka-server
-    build: ../../EurekaServer
-    ports:
-      - ${ENV_EUREKA_SERVER_PORT}:${ENV_EUREKA_SERVER_PORT}
-    environment:
-      - SERVER_PORT=${ENV_EUREKA_SERVER_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-    networks:
-      - microservices-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  spring-user-service:
-    container_name: users-service
-    build: ../../UserManagementService
+  ktor-user-service:
+    container_name: ktor-users-service
+    build: ../../UserService
     ports:
       - "8001:8001"
     environment:
       - SERVER_PORT=${ENV_USERS_SERVICE_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
       # PostgreSQL
-      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
-      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
-      - APP_POSTGRESQL_NAME=${ENV_USERS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_USERS_SERVICE_DATABASE}
       - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
       - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
     depends_on:
-      #- postgres
-      - config-server
+    - postgres
     networks:
       - microservices-network
     logging:
@@ -85,26 +46,21 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  spring-task-service:
-    container_name: tasks-service
-    build: ../../TaskManagementService
+  ktor-task-service:
+    container_name: ktor-task-service
+    build: ../../TaskService
     ports:
       - "8002:8002"
     environment:
-      - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
+      - SERVER_PORT=${ENV_TASKS_SERVICE_PORT}
       # PostgreSQL
-      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
-      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
-      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_PROJECTS_SERVICE_DATABASE}
       - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
       - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
       #Kafka
       - KAFKA_URL=${ENV_KAFKA_URL}
     depends_on:
-      #- postgres
-      - config-server
+    - postgres
     networks:
       - microservices-network
     logging:
@@ -113,24 +69,19 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  spring-project-service:
-    container_name: projects-service
-    build: ../../ProjectManagementService
+  ktor-project-service:
+    container_name: ktor-projects-service
+    build: ../../ProjectService
     ports:
       - "8003:8003"
     environment:
       - SERVER_PORT=${ENV_PROJECTS_SERVICE_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
       # PostgreSQL
-      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
-      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
-      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_PROJECTS_SERVICE_DATABASE}
       - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
       - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
     depends_on:
-      #- postgres
-      - config-server
+    - postgres
     networks:
       - microservices-network
     logging:
@@ -140,30 +91,129 @@ services:
         max-file: "3"
 
   # Analytics Service
-  spring-analytics-service:
-    container_name: analytics-service
-    image: analytics-service:latest
+  ktor-analytics-service:
+    container_name: ktor-analytics-service
     build: ../../AnalyticsService
     ports:
       - "8004:8004"
     environment:
       - SERVER_PORT=${ENV_ANALYTICS_SERVICE_PORT}
-      - CLOUD_CONFIG_URL=${ENV_SERVER_CONFIG_HOST}:${ENV_SERVER_CONFIG_PORT}
-      - EUREKA_SERVER=${ENV_EUREKA_SERVER_HOST}
       # PostgreSQL
-      - APP_POSTGRESQL_HOST=${ENV_APP_POSTGRESQL_HOST}
-      - APP_POSTGRESQL_PORT=${ENV_APP_POSTGRESQL_PORT}
-      - APP_POSTGRESQL_NAME=${ENV_PROJECTS_SERVICE_DATABASE}
+      - APP_POSTGRESQL_DATABASE=${ENV_APP_POSTGRESQL_HOST}/${ENV_ANALYTICS_SERVICE_DATABASE}
       - APP_POSTGRESQL_USER=${ENV_APP_POSTGRESQL_USER}
       - APP_POSTGRESQL_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
-       # Kafka
+      # Kafka
       - KAFKA_URL=${ENV_KAFKA_URL}
     depends_on:
-      - config-server
-      #- postgres
-      #- kafka
+    - postgres
+    - kafka
     networks:
       - microservices-network
+
+  #---------------------Инфраструктурные_сервисы------------------------#
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_USER=${ENV_APP_POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${ENV_APP_POSTGRESQL_PASSWORD}
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker-entrypoint/postgres-db-init.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - postgres_data_spms:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"   # Для PLAINTEXT
+      - "9093:9093"   # Для PLAINTEXT_INTERNAL
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "task-requests:1:1,task-responses:1:1,task-events:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+    networks:
+      - microservices-network
+
+  zookeeper:
+    image: zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - microservices-network
+
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+#    environment:
+#      - discovery.type=single-node
+#      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+#    ports:
+#      - "9200:9200"
+#    volumes:
+#      - elasticsearch-data:/usr/share/elasticsearch/data
+#    networks:
+#      - microservices-network
+#
+#  # Logstash
+#  logstash:
+#    image: docker.elastic.co/logstash/logstash:7.17.9
+#    volumes:
+#      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#    ports:
+#      - "5044:5044"  # Порт для приема логов
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - microservices-network
+#
+#  # Kibana
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.17.9
+#    ports:
+#      - "5601:5601"
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - microservices-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - microservices-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - microservices-network
+
+volumes:
+  postgres_data_spms:
+  elasticsearch-data:
 
 networks:
   microservices-network:

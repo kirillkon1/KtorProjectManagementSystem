@@ -6,6 +6,8 @@ import io.ktor.server.plugins.contentnegotiation.*
 import org.koin.ktor.plugin.Koin
 import config.configureDatabases
 import configurePrometheus
+import ru.itmo.config.KafkaConfig
+import ru.itmo.config.kafkaConfig
 import ru.itmo.config.kafkaConfigure
 import ru.itmo.modules.configureRouting
 import ru.itmo.repository.TaskRepository
@@ -34,5 +36,9 @@ fun Application.module() {
     configureDatabases()
     configureRouting()
     configurePrometheus()
+    kafkaConfig()
     kafkaConfigure()
+
+    println("SERVER STARTED ON PORT ${environment.config.property("ktor.deployment.port").getString()}")
+
 }
