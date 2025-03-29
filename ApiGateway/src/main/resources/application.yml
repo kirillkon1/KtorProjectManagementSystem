@@ -17,3 +17,17 @@ spring:
           signature-algorithm: HS256
 
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  endpoint:
+    prometheus:
+      access: unrestricted
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true

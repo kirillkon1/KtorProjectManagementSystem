@@ -27,3 +27,8 @@ scrape_configs:
     static_configs:
       - targets: ['ktor-api-gateway:8050']
 
+
+  - job_name: 'ktor-api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['ktor-api-gateway:8050']
